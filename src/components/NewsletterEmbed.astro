@@ -1,0 +1,17 @@
+---
+const provider = import.meta.env.NEWSLETTER_PROVIDER;
+const publicationId = import.meta.env.BEEHIIV_PUBLICATION_ID;
+const isBeehiiv = provider === 'beehiiv' && publicationId;
+---
+
+{isBeehiiv ? (
+  <div class="newsletter-embed">
+    <a href={`https://beehiiv.com/subscribe/${publicationId}`} target="_blank" rel="noopener noreferrer">
+      Subscribe to our newsletter
+    </a>
+  </div>
+) : (
+  <div class="newsletter-disabled">
+    <!-- Newsletter provider not configured or missing Beehiiv ID -->
+  </div>
+)}

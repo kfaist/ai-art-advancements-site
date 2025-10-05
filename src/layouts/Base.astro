@@ -1,7 +1,11 @@
 ---
 const { title, description = '' } = Astro.props;
+import NewsletterEmbed from '../components/NewsletterEmbed.astro';
+
 ---
 <!DOCTYPE html>
+
+
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -17,10 +21,13 @@ const { title, description = '' } = Astro.props;
       </nav>
     </header>
     <main>
-      <slot />
+      
+      
+<slot />
     </main>
     <footer>
-      <p>&copy; 2025 AI Art Advancements</p>
+
+      <NewsletterEmbed />
     </footer>
   </body>
 </html>

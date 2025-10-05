@@ -2,39 +2,50 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 env:
   REPO_NAME: ${{ github.event.repository.name }}
   ASTRO_SITE: https://kfaist.github.io
-  ASTRO_BASE: /${{ env.REPO_NAME }}
+  ASTRO_BASE: /${{ github.event.repository.name }}
+  NEWSLETTER_PROVIDER: ${{ vars.NEWSLETTER_PROVIDER }}
+  BEEHIIV_PUBLICATION_ID: ${{ vars.BEEHIIV_PUBLICATION_ID }}
+  ANALYTICS_PROVIDER: ${{ vars.ANALYTICS_PROVIDER }}
+  PLAUSIBLE_DOMAIN: ${{ vars.PLAUSIBLE_DOMAIN }}
+  TWITTER_HANDLE: ${{ vars.TWITTER_HANDLE }}
+  DEFAULT_OG_IMAGE: ${{ vars.DEFAULT_OG_IMAGE }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pages: write
-      id-token: write
+        contents: read
+        pages: write
+        id-token: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 20
-
       - name: Install dependencies
         run: npm install
-
       - name: Build
         run: npx astro build
-
+        env:
+          ASTRO_SITE: ${{ env.ASTRO_SITE }}
+          ASTRO_BASE: ${{ env.ASTRO_BASE }}
+          NEWSLETTER_PROVIDER: ${{ env.NEWSLETTER_PROVIDER }}
+          BEEHIIV_PUBLICATION_ID: ${{ env.BEEHIIV_PUBLICATION_ID }}
+          ANALYTICS_PROVIDER: ${{ env.ANALYTICS_PROVIDER }}
+          PLAUSIBLE_DOMAIN: ${{ env.PLAUSIBLE_DOMAIN }}
+          TWITTER_HANDLE: ${{ env.TWITTER_HANDLE }}
+          DEFAULT_OG_IMAGE: ${{ env.DEFAULT_OG_IMAGE }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: ./dist
-
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
