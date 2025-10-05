@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://kfaist.github.io/ai-art-advancements-site/sitemap-index.xml
