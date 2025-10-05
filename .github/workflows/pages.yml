@@ -1,54 +1,33 @@
-name: Deploy Astro site to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Set environment variables for site and base
-# REPO_NAME refers to the repository name from the GitHub context
-# ASTRO_SITE is the root domain for all sites under the user account
-# ASTRO_BASE is computed from the repository name
-env:
-  REPO_NAME: ${{ github.event.repository.name }}
-  ASTRO_SITE: https://kfaist.github.io
-  ASTRO_BASE: /${{ env.REPO_NAME }}
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3
         with:
-          node-version: 20
-          cache: 'npm'
-      - run: npm install
-      - run: npx astro build
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
         env:
-          ASTRO_SITE: ${{ env.ASTRO_SITE }}
-          ASTRO_BASE: ${{ env.ASTRO_BASE }}
+          ASTRO_SITE: https://kfaist.github.io
+          ASTRO_BASE: /${{ github.event.repository.name }}
+        run: npx astro build
 
-  upload:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: ./dist
-
-  deploy:
-    needs: upload
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
       - name: Deploy to GitHub Pages
-        id: deploy
-        uses: actions/deploy-pages@v1
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
