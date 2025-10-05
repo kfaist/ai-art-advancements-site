@@ -1,0 +1,14 @@
+{
+  "name": "ai-art-advancements-site",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^4.4.0",
+    "@astrojs/rss": "^3.3.0",
+    "@astrojs/sitemap": "^0.5.4"
+  }
+}
