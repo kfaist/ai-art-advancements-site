@@ -1,0 +1,14 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const allPosts = await getCollection('posts');
+---
+<Base title="Blog" description="Latest posts about AI art advancements.">
+  <h1>Blog</h1>
+  <ul>
+    {allPosts.map((post) => (
+      <li><a href={import.meta.env.BASE_URL + 'blog/' + post.slug + '/'}>{post.data.title}</a> - <time>{post.data.date}</time></li>
+    ))}
+  </ul>
+</Base>
