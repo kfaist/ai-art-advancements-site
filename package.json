@@ -11,4 +11,8 @@
     "@astrojs/rss": "^3.3.0",
     "@astrojs/sitemap": "^0.5.4"
   }
+},
+  "overrides": {
+    "@astrojs/rss": "3.2.0"
+  }
 }
