@@ -1,0 +1,25 @@
+﻿name: Daily AI Art News
+
+on:
+  schedule:
+    - cron: '0 13 * * *'  # 9 AM EST daily
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install rss-parser
+      - name: Generate content
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node scripts/daily-news.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: post-${{ github.run_number }}
+          path: content/daily-output.json
+          retention-days: 90
