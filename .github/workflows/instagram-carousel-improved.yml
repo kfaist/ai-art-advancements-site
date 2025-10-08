@@ -19,17 +19,15 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: |
-          cd instagram-generator
-          npm install
+        working-directory: ./instagram-generator
+        run: npm install
 
       - name: Generate improved carousel
+        working-directory: ./instagram-generator
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ZAPIER_WEBHOOK_URL: ${{ secrets.ZAPIER_WEBHOOK_URL }}
-        run: |
-          cd instagram-generator
-          node improved-carousel-generator.js
+        run: node improved-carousel-generator.js
 
       - name: Upload to Pages
         run: |
