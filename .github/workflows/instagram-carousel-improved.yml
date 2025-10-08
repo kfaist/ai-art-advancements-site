@@ -1,0 +1,45 @@
+name: Generate Instagram Carousel (Improved)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 14 * * *'  # 9 AM EST daily
+
+jobs:
+  generate-post:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - run: npm install openai
+      
+      - name: Generate improved carousel
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ZAPIER_WEBHOOK_URL: ${{ secrets.ZAPIER_WEBHOOK_URL }}
+        run: |
+          cd instagram-generator
+          node improved-carousel-generator.js
+      
+      - name: Upload to Pages
+        run: |
+          mkdir -p public/instagram
+          cp instagram-generator/output/*.json public/instagram/ 2>/dev/null || true
+      
+      - name: Commit
+        run: |
+          git config user.name "AI Art Bot"
+          git config user.email "bot@ai.art"
+          git add public/ instagram-generator/output/
+          git commit -m "🎨 Carousel $(date +%Y-%m-%d)" || true
+          git push || true
+      
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
