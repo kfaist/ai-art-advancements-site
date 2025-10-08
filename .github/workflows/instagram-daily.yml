@@ -1,0 +1,43 @@
+name: Generate Instagram Carousel
+
+on:
+  schedule:
+    - cron: '0 15 * * *'  # 11 AM EST daily
+  workflow_dispatch:  # Manual trigger button
+
+jobs:
+  generate-instagram:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: |
+          cd tools/ig-generator
+          npm install
+      
+      - name: Generate carousel
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          cd tools/ig-generator
+          node generate-carousel.js
+      
+      - name: Upload carousel
+        uses: actions/upload-artifact@v4
+        with:
+          name: instagram-carousel-${{ github.run_number }}
+          path: tools/ig-generator/drafts/
+          retention-days: 30
+      
+      - name: Commit to repo
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add tools/ig-generator/drafts/
+          git commit -m "Generated Instagram carousel - $(date)" || echo "No changes"
+          git push

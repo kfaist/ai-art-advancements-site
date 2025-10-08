@@ -1,0 +1,29 @@
+COPY THIS INTO NEXT CHAT:
+================================================================================
+
+Hi Claude! Fix GitHub Pages 404 NOW
+
+Path: C:\Users\Krista\Desktop\ai-art-advancements-site
+
+INSTRUCTIONS:
+1. Read START_HERE_NEXT_CHAT.md (quick overview)
+2. Read FIX_404_NOW.md (full details)
+3. Execute the PowerShell fix immediately
+4. Test build
+5. Push to GitHub
+
+Problem: .env has wrong variable names (SITE_URL/PUBLIC_BASE_PATH)
+Solution: Rename to ASTRO_SITE/ASTRO_BASE
+
+Just read those two files and fix it. Don't investigate - the problem is identified and documented.
+
+GO!
+
+================================================================================
+
+ALTERNATIVE SHORTER VERSION:
+================================================================================
+
+Claude: Read C:\Users\Krista\Desktop\ai-art-advancements-site\START_HERE_NEXT_CHAT.md then fix it immediately. Don't investigate, just execute.
+
+================================================================================

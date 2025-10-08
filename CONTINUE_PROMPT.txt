@@ -1,0 +1,48 @@
+I'm building the AI Art Advancements Site. Project location: C:\Users\Krista\Desktop\ai-art-advancements-site
+
+PROJECT CONTEXT:
+- Building an automated content pipeline for AI art news and nonprofit tech content
+- Site generates daily blog posts, Instagram carousels, and social media content  
+- Uses OpenAI GPT-4 for captions and DALL-E 3 for images
+- Full documentation in DEPLOYMENT_CHECKLIST.md and PROJECT_COMPLETE.md
+
+CURRENT STATUS:
+✅ Phase 1: Project structure created
+✅ Phase 2: Astro site with pages, layouts, components complete
+✅ Node.js installed at: C:\Program Files\nodejs\
+⚠️ npm not in PATH - use full path: "C:\Program Files\nodejs\npm.cmd"
+⚠️ npm install not yet run (canvas package issue)
+⚠️ package.json line 20 with canvas needs removal
+
+IMMEDIATE FIX NEEDED:
+1. Add Node.js to PATH:
+   - Run in admin cmd: setx PATH "%PATH%;C:\Program Files\nodejs" /M
+   - OR System Properties > Environment Variables > Path > Add: C:\Program Files\nodejs
+2. Remove canvas from package.json if still there
+3. Run: cd C:\Users\Krista\Desktop\ai-art-advancements-site
+4. Run: npm install
+5. Run: npm run dev
+6. Visit: http://localhost:4321
+
+NEXT PHASE AFTER SITE RUNS:
+1. Create .env file from .env.example with OpenAI API key
+2. Test scripts/daily-news.js with: npm run daily-news
+3. Test scripts/nonprofit-news.js with: npm run nonprofit-news
+4. Create scripts/ig-generator/generate.js for Instagram carousels
+5. Set up GitHub Actions workflows in .github/workflows/
+6. Deploy to GitHub Pages
+
+KEY FILES TO CHECK:
+- package.json - dependencies and scripts
+- astro.config.mjs - site configuration
+- src/pages/index.astro - homepage
+- scripts/daily-news.js - news aggregator
+- DEPLOYMENT_CHECKLIST.md - complete setup guide
+- NEXT_SESSION_PROMPT.md - this continuation guide
+
+TOOLS AVAILABLE:
+- Desktop Commander for file operations
+- Filesystem tools if DC has issues
+- Web browser at http://localhost:4321 once running
+
+Goal: Get npm working, install dependencies, start dev server, verify site loads, then proceed with automation scripts.

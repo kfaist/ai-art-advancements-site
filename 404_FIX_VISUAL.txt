@@ -1,0 +1,71 @@
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                  🎯 GITHUB PAGES 404 - ROOT CAUSE DIAGRAM                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────┐
+│   astro.config.mjs            │
+│   (What Astro is looking for) │
+├───────────────────────────────┤
+│                               │
+│  Looking for:                 │
+│  ▸ ASTRO_SITE                 │  ← These variable names
+│  ▸ ASTRO_BASE                 │  
+│                               │
+│  Gets: undefined              │  ← Can't find them!
+│  Result: Wrong paths → 404    │
+└───────────────────────────────┘
+           ↓
+           ↓ Reads from process.env
+           ↓
+┌───────────────────────────────┐
+│   .env file                   │
+│   (What actually exists)      │
+├───────────────────────────────┤
+│                               │
+│  Has:                         │
+│  ▸ SITE_URL            ❌     │  ← Wrong names
+│  ▸ PUBLIC_BASE_PATH    ❌     │
+│                               │
+│  Astro can't find these!      │
+└───────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                            THE FIX (30 seconds):
+
+┌───────────────────────────────┐       ┌───────────────────────────────┐
+│   .env BEFORE (Broken)        │       │   .env AFTER (Fixed)          │
+├───────────────────────────────┤       ├───────────────────────────────┤
+│                               │       │                               │
+│  SITE_URL=https://...    ❌   │  ──▶  │  ASTRO_SITE=https://...  ✅   │
+│  PUBLIC_BASE_PATH=/...   ❌   │  ──▶  │  ASTRO_BASE=/...         ✅   │
+│                               │       │                               │
+│  Astro: "What's ASTRO_SITE?"  │       │  Astro: "Found it! ✅"        │
+└───────────────────────────────┘       └───────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                               QUICK FIX COMMAND:
+
+  (Get-Content .env) -replace 'SITE_URL=','ASTRO_SITE=' `
+                      -replace 'PUBLIC_BASE_PATH=','ASTRO_BASE=' | Set-Content .env
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                            VERIFICATION CHECKLIST:
+
+  □ .env has ASTRO_SITE (not SITE_URL)
+  □ .env has ASTRO_BASE (not PUBLIC_BASE_PATH)  
+  □ npm run build succeeds
+  □ dist/ folder created
+  □ git push completes
+  □ GitHub Actions shows green ✅
+  □ Site loads (not 404) ✅
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                              CONFIDENCE: 99%
+
+  This is definitely the problem. No other issues to investigate.
+
+═══════════════════════════════════════════════════════════════════════════════

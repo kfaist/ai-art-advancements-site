@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsCard from '../components/NewsCard.astro';
+
+// Try to load news data if it exists
+let newsData = [];
+try {
+    const data = await import('../../content/daily-output.json');
+    newsData = data.default?.articles || [];
+} catch (e) {
+    // No news data yet
+}
+---
+
+<BaseLayout title="News Dashboard">
+    <h1>📰 AI Art News Dashboard</h1>
+    
+    {newsData.length === 0 ? (
+        <p>No news articles yet. Run <code>npm run daily-news</code> to generate content!</p>
+    ) : (
+        <div class="news-grid">
+            {newsData.map(article => (
+                <NewsCard article={article} />
+            ))}
+        </div>
+    )}
+    
+    <style>
+        .news-grid {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+    </style>
+</BaseLayout>

@@ -1,0 +1,38 @@
+name: Daily Content Generation
+
+on:
+  schedule:
+    # 9 AM EST daily for AI art news
+    - cron: '0 14 * * *'  # 14:00 UTC = 9:00 EST
+    # 11 AM EST Tue/Fri for nonprofit
+    - cron: '0 16 * * 2,5'  # 16:00 UTC = 11:00 EST
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  generate-content:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - run: npm ci
+    
+    - name: Generate Daily Content
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        npm run daily-news
+        npm run nonprofit-news
+        node scripts/ig-generator/generate.js
+    
+    - name: Commit and Push
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add -A
+        git commit -m "🤖 Daily content update $(date +'%Y-%m-%d')" || echo "No changes"
+        git push
