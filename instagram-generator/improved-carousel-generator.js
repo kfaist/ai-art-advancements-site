@@ -1,6 +1,3 @@
-// improved-carousel-generator.js
-// Generates Instagram carousel with headlines on every 3rd slide
-
 import OpenAI from 'openai';
 import fs from 'fs';
 import path from 'path';
@@ -38,10 +35,10 @@ async function generateCarouselImages(stories) {
     const isHeadlineSlide = (slideNum % 3 === 0);
     
     let prompt = isHeadlineSlide 
-      ? `Create stunning abstract AI art with prominent text "${story.title}" in Space Mono font. Vibrant neon colors, high contrast, futuristic aesthetic.`
-      : `Create AI art for: "${story.title}". Vibrant neon, abstract, futuristic. NO text.`;
+      ? `Create stunning abstract AI art with prominent text "${story.title}" in Space Mono font. Vibrant neon colors (cyan, magenta, electric blue, hot pink), high contrast, futuristic aesthetic, text must be large and readable.`
+      : `Create stunning AI-generated art for: "${story.title}". Vibrant neon colors (cyan, magenta, electric blue, hot pink), abstract or surreal, futuristic tech-aesthetic, high visual impact for Instagram. NO text overlay - pure visual art.`;
     
-    console.log(`  Slide ${slideNum}/${stories.length}${isHeadlineSlide ? ' (HEADLINE)' : ''}...`);
+    console.log(`  Generating slide ${slideNum}/${stories.length}${isHeadlineSlide ? ' (HEADLINE)' : ''}...`);
     
     const response = await openai.images.generate({
       model: "dall-e-3",
@@ -50,7 +47,12 @@ async function generateCarouselImages(stories) {
       quality: "hd"
     });
     
-    images.push({ url: response.data[0].url, slideNum, isHeadline: isHeadlineSlide, story: story.title });
+    images.push({ 
+      url: response.data[0].url, 
+      slideNum, 
+      isHeadline: isHeadlineSlide, 
+      story: story.title 
+    });
     
     if (i < stories.length - 1) await new Promise(r => setTimeout(r, 2000));
   }
@@ -60,7 +62,9 @@ async function generateCarouselImages(stories) {
 
 function generateInstagramCaption(stories) {
   let caption = `${stories[0].title}\n\n${stories[0].summary}\n\nWHY IT MATTERS: ${stories[0].why_matters}\n\n📖 READ MORE:\n`;
-  stories.forEach((s, i) => { caption += `${i+1}. ${s.title}\n   ${s.url}\n\n`; });
+  stories.forEach((s, i) => { 
+    caption += `${i+1}. ${s.title}\n   ${s.url}\n\n`; 
+  });
   caption += `📰 Sources: ${stories.map(s => s.source).join(', ')}\n\n`;
   
   const tags = new Set();
@@ -106,7 +110,9 @@ async function main() {
     
     const output = {
       timestamp: new Date().toISOString(),
-      stories, images, caption,
+      stories, 
+      images, 
+      caption,
       metadata: {
         totalSlides: images.length,
         headlineSlides: images.filter(img => img.isHeadline).length,
@@ -128,7 +134,7 @@ async function main() {
     console.log(caption);
     console.log('─'.repeat(50) + '\n🖼️  SLIDES:');
     images.forEach(img => {
-      console.log(`  ${img.slideNum}. ${img.isHeadline ? '📰' : '🎨'} ${img.story}`);
+      console.log(`  ${img.slideNum}. ${img.isHeadline ? '📰 HEADLINE:' : '🎨 ART:'} ${img.story}`);
     });
     
   } catch (error) {

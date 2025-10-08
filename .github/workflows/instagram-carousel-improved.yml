@@ -10,14 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
-      
-      - uses: actions/setup-node@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
-      - run: npm install openai
-      
+
+      - name: Install dependencies
+        run: npm install openai
+
       - name: Generate improved carousel
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -25,21 +28,32 @@ jobs:
         run: |
           cd instagram-generator
           node improved-carousel-generator.js
-      
+
       - name: Upload to Pages
         run: |
           mkdir -p public/instagram
           cp instagram-generator/output/*.json public/instagram/ 2>/dev/null || true
-      
-      - name: Commit
+
+      - name: Commit generated content
         run: |
           git config user.name "AI Art Bot"
           git config user.email "bot@ai.art"
           git add public/ instagram-generator/output/
-          git commit -m "🎨 Carousel $(date +%Y-%m-%d)" || true
+          git commit -m "🎨 New carousel $(date +%Y-%m-%d)" || true
           git push || true
-      
-      - uses: peaceiris/actions-gh-pages@v3
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "## 🎉 Carousel Generated!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Images with headlines on every 3rd slide" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Curated AI art news stories" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Source links included in caption" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Zapier notified for Instagram posting" >> $GITHUB_STEP_SUMMARY
