@@ -19,7 +19,9 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install openai
+        run: |
+          cd instagram-generator
+          npm install
 
       - name: Generate improved carousel
         env:
