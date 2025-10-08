@@ -213,12 +213,13 @@ async function createCarouselPost(content, index) {
   fs.mkdirSync(carouselFolder, { recursive: true });
   console.log(`📁 Created folder: ${postFolder}`);
   
-  // 1. Generate cover image
+  // 1. Generate cover image WITH TEXT OVERLAY
   const theme = THEMES[content.theme];
-  const imagePrompt = `${theme.style} digital art illustration showing "${content.title}", 
-    featuring vibrant ${theme.colors.join(' and ')} colors, highly detailed, 
+  const imagePrompt = `${theme.style} digital art illustration with bold text overlay reading "${content.title}" prominently displayed at the top,
+    featuring vibrant ${theme.colors.join(' and ')} colors, highly detailed,
     Instagram square format 1024x1024, professional quality, eye-catching composition,
-    dramatic lighting, ultra high quality, trending on artstation`;
+    clean readable typography integrated into the design, text should be clearly visible and not bleeding over edges,
+    dramatic lighting, ultra high quality, trending on artstation, magazine cover style with headline text`;
   
   console.log('\n📸 Generating cover image...');
   const coverImage = await generateImage(imagePrompt);
@@ -234,22 +235,39 @@ async function createCarouselPost(content, index) {
     console.log(`  ✅ Placeholder saved: 01_cover_placeholder.txt`);
   }
   
-  // 2. Create text slides
-  console.log('\n📝 Creating text slides...');
+  // 2. Generate text slide images with DALL-E
+  console.log('\n📝 Creating carousel slides...');
   const slides = [
     { num: '02', title: 'THE CONTEXT', text: content.description },
     { num: '03', title: 'WHY IT MATTERS', text: content.impact },
-    { num: '04', title: 'LEARN MORE', text: 'Follow for more AI innovations!' }
+    { num: '04', title: 'LEARN MORE', text: 'Follow @ai.advancements.art for daily AI innovations!' }
   ];
   
   for (const slide of slides) {
-    const slideContent = `${slide.title}\n\n${slide.text}`;
-    const slideBuffer = createTextSlide(slideContent, content.theme);
-    fs.writeFileSync(
-      path.join(carouselFolder, `${slide.num}_${slide.title.toLowerCase().replace(/\s+/g, '_')}.txt`), 
-      slideBuffer
-    );
-    console.log(`  ✅ Created slide: ${slide.num} - ${slide.title}`);
+    const slidePrompt = `Clean minimalist Instagram slide design with "${slide.title}" as bold header text at top,
+      and body text reading "${slide.text}" below in readable font,
+      ${theme.style} background with ${theme.colors.join(' and ')} gradient colors,
+      professional typography, Instagram square 1024x1024, modern social media post design,
+      text clearly visible and not bleeding over edges, magazine layout style`;
+    
+    console.log(`  Generating slide ${slide.num}: ${slide.title}...`);
+    const slideImage = await generateImage(slidePrompt);
+    
+    if (slideImage) {
+      fs.writeFileSync(
+        path.join(carouselFolder, `${slide.num}_${slide.title.toLowerCase().replace(/\s+/g, '_')}.jpg`),
+        slideImage
+      );
+      console.log(`  ✅ Created slide image: ${slide.num} - ${slide.title}`);
+    } else {
+      // Fallback to text file
+      const slideBuffer = createTextSlide(`${slide.title}\n\n${slide.text}`, content.theme);
+      fs.writeFileSync(
+        path.join(carouselFolder, `${slide.num}_${slide.title.toLowerCase().replace(/\s+/g, '_')}.txt`), 
+        slideBuffer
+      );
+      console.log(`  ⚠️ Created text file: ${slide.num} - ${slide.title}`);
+    }
   }
   
   // 3. Save prompt used
