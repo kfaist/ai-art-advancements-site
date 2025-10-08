@@ -1,0 +1,58 @@
+name: Daily Instagram Carousel
+
+on:
+  schedule:
+    - cron: '0 15 * * *'  # 11 AM EST daily
+  workflow_dispatch:
+
+jobs:
+  generate-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: |
+          cd tools/ig-generator
+          npm install openai dotenv canvas
+      
+      - name: Generate carousel
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          cd tools/ig-generator
+          node generate-carousel.js
+      
+      - name: Get latest draft folder
+        id: draft
+        run: |
+          cd tools/ig-generator/drafts
+          LATEST=$(ls -t | head -1)
+          echo "folder=$LATEST" >> $GITHUB_OUTPUT
+          echo "Generated: $LATEST"
+      
+      - name: Commit and push images
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add tools/ig-generator/drafts/
+          git commit -m "🎨 Daily Instagram carousel - $(date +%Y-%m-%d)" || exit 0
+          git push
+      
+      - name: Create Instagram JSON
+        run: |
+          cd tools/ig-generator
+          node create-instagram-json.js
+          git add latest-instagram.json
+          git commit -m "Update latest Instagram data" || exit 0
+          git push
+      
+      - name: Trigger Zapier Webhook
+        run: |
+          curl -X POST "${{ secrets.ZAPIER_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d @tools/ig-generator/latest-instagram.json || echo "Webhook optional"
