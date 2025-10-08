@@ -1,0 +1,13 @@
+{
+  "name": "instagram-carousel-generator",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Generates Instagram carousels with AI",
+  "main": "improved-carousel-generator.js",
+  "scripts": {
+    "generate": "node improved-carousel-generator.js"
+  },
+  "dependencies": {
+    "openai": "^4.0.0"
+  }
+}

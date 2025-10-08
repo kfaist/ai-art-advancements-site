@@ -1,9 +1,10 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches:
-      - main
+  # Disabled auto-run on push - run manually only
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 env:

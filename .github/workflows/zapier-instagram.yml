@@ -1,0 +1,101 @@
+name: Zapier → Instagram Post
+
+on:
+  workflow_dispatch:
+    inputs:
+      content_type:
+        description: 'Type of content to generate'
+        required: false
+        default: 'daily'
+  schedule:
+    - cron: '0 14 * * *'  # 9 AM EST
+
+jobs:
+  generate-and-post:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate AI content
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          node scripts/daily-news.js
+          echo "✅ Content generated"
+
+      - name: Generate Instagram carousel
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          cd instagram-generator
+          npm install
+          node generate.js
+          echo "🎨 Carousel created"
+
+      - name: Prepare data for Zapier
+        id: prepare-data
+        run: |
+          CONTENT=$(cat content/daily-output.json)
+          TITLE=$(echo $CONTENT | jq -r '.articles[0].title // "AI Art Update"')
+          CAPTION=$(echo $CONTENT | jq -r '.articles[0].caption // ""')
+          HASHTAGS=$(echo $CONTENT | jq -r '.articles[0].hashtags | join(" ") // ""')
+          
+          mkdir -p public/instagram
+          cp instagram-generator/output/*.png public/instagram/ 2>/dev/null || true
+          
+          IMAGES=$(ls instagram-generator/output/*.png 2>/dev/null | xargs -I {} basename {} | jq -R -s -c 'split("\n")[:-1] | map("https://kfaist.github.io/ai-art-advancements-site/instagram/" + .)')
+          
+          cat > instagram-post.json <<EOF
+          {
+            "title": "$TITLE",
+            "caption": "$CAPTION",
+            "hashtags": "$HASHTAGS",
+            "full_caption": "$CAPTION\n\n$HASHTAGS",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "images": $IMAGES,
+            "source": "github-actions"
+          }
+          EOF
+          
+          echo "📦 Post data ready:"
+          cat instagram-post.json
+
+      - name: Notify Zapier webhook
+        if: success()
+        env:
+          ZAPIER_WEBHOOK_URL: ${{ secrets.ZAPIER_WEBHOOK_URL }}
+        run: |
+          curl -X POST "$ZAPIER_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d @instagram-post.json
+          
+          echo "✅ Zapier notified!"
+
+      - name: Commit generated content
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add content/ public/ || true
+          git diff --quiet && git diff --staged --quiet || git commit -m "🎨 Daily AI art content $(date +%Y-%m-%d)"
+          git push || true
+
+      - name: Build site
+        run: npm run build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
