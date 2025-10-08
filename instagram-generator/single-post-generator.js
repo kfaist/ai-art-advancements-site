@@ -10,73 +10,69 @@ const __dirname = path.dirname(__filename);
 const parser = new Parser();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Simple, reliable sources
 const NEWS_SOURCES = [
+  'https://huggingface.co/blog/feed.xml',
   'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml',
-  'https://techcrunch.com/tag/artificial-intelligence/feed/',
-  'https://huggingface.co/blog/feed.xml'
+  'https://techcrunch.com/tag/artificial-intelligence/feed/'
 ];
 
-const KEYWORDS = ['ai art', 'generative', 'dall-e', 'midjourney', 'stable diffusion', 'image generation'];
+const KEYWORDS = ['ai art', 'generative', 'dall-e', 'midjourney', 'stable diffusion', 'image generation', 'diffusion'];
 
 async function fetchNews() {
-  console.log('📰 Fetching news...\n');
-  
+  console.log('📰 Fetching AI art news...\n');
   const allArticles = [];
   
   for (const url of NEWS_SOURCES) {
     try {
-      console.log(`Fetching ${url}...`);
       const feed = await parser.parseURL(url);
       allArticles.push(...feed.items.slice(0, 10));
-      console.log(`✅ Got ${feed.items.length} items\n`);
+      console.log(`  ✅ ${new URL(url).hostname}`);
     } catch (error) {
-      console.log(`⚠️  Failed: ${error.message}\n`);
+      console.log(`  ⚠️  ${new URL(url).hostname}: ${error.message}`);
     }
   }
   
-  // Filter for AI art content
   const relevant = allArticles.filter(item => {
     const text = (item.title + ' ' + (item.contentSnippet || '')).toLowerCase();
-    return KEYWORDS.some(keyword => text.includes(keyword));
+    return KEYWORDS.some(kw => text.includes(kw));
   });
+  
+  relevant.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
   
   if (relevant.length === 0) {
     throw new Error('No AI art news found');
   }
   
-  // Get most recent
-  relevant.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-  
-  console.log(`Found ${relevant.length} relevant articles`);
-  console.log(`Top story: ${relevant[0].title}\n`);
-  
-  return relevant[0];
+  const story = relevant[0];
+  console.log(`\n🏆 Selected: "${story.title}"\n`);
+  return story;
 }
 
 async function generateCaption(article) {
-  console.log('✍️  Generating caption...\n');
+  console.log('✍️  Generating caption...');
   
-  const prompt = `Write an Instagram caption for this article:
+  const prompt = `Write an Instagram caption for:
 
 Title: ${article.title}
-Summary: ${article.contentSnippet || 'No summary'}
+Summary: ${article.contentSnippet || 'See link'}
 URL: ${article.link}
 
-Format:
-[Title]
+Format exactly like this:
 
-[Hook sentence]
+[Compelling title - max 60 chars]
+
+[One sentence hook that grabs attention]
 
 THE CONTEXT:
-[What happened]
+[2-3 sentences - what happened, the facts]
 
 WHY IT MATTERS:
-[Why it matters]
+[2-3 sentences - significance and impact]
 
 THE CAPABILITIES:
-• [Point 1]
-• [Point 2]
+• [Specific capability 1]
+• [Specific capability 2]  
+• [Specific capability 3]
 
 READ MORE: ${article.link}
 
@@ -93,9 +89,11 @@ READ MORE: ${article.link}
 }
 
 async function generateImage(article) {
-  console.log('🎨 Generating image...\n');
+  console.log('🎨 Generating image...');
   
-  const prompt = `Vibrant abstract AI art inspired by: "${article.title}". Neon colors (cyan, magenta, purple, pink), futuristic, high impact. NO TEXT.`;
+  const prompt = `Create a striking abstract AI artwork for: "${article.title}". 
+  Vibrant neon colors (cyan, magenta, purple, hot pink), futuristic tech aesthetic, 
+  high visual drama perfect for Instagram. NO text or words.`;
   
   const response = await openai.images.generate({
     model: "dall-e-3",
@@ -109,32 +107,24 @@ async function generateImage(article) {
 }
 
 async function main() {
-  console.log('🚀 Instagram Post Generator\n');
-  console.log('='.repeat(50));
-  console.log('\n');
+  console.log('🚀 Instagram Single Post Generator\n');
+  console.log('='.repeat(50) + '\n');
   
   try {
-    // Check API key
     if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY not set');
+      throw new Error('OPENAI_API_KEY environment variable not set');
     }
-    console.log('✅ OpenAI API key found\n');
     
-    // 1. Fetch news
     const article = await fetchNews();
-    
-    // 2. Generate caption
     const caption = await generateCaption(article);
-    
-    // 3. Generate image
     const imageUrl = await generateImage(article);
     
-    // 4. Save output
     const output = {
       article: {
         title: article.title,
         link: article.link,
-        pubDate: article.pubDate
+        pubDate: article.pubDate,
+        snippet: article.contentSnippet
       },
       imageUrl,
       caption,
@@ -145,20 +135,24 @@ async function main() {
     fs.mkdirSync(outputDir, { recursive: true });
     
     const filename = `post-${new Date().toISOString().split('T')[0]}.json`;
-    const filepath = path.join(outputDir, filename);
-    fs.writeFileSync(filepath, JSON.stringify(output, null, 2));
+    fs.writeFileSync(
+      path.join(outputDir, filename),
+      JSON.stringify(output, null, 2)
+    );
     
     console.log('='.repeat(50));
-    console.log('\n📱 POST PREVIEW:\n');
+    console.log('\n✅ POST GENERATED!\n');
+    console.log(`📄 Saved: ${filename}`);
+    console.log(`🖼️  Image: ${imageUrl}`);
+    console.log(`📰 Article: ${article.link}\n`);
+    console.log('CAPTION:\n');
+    console.log('='.repeat(50));
     console.log(caption);
-    console.log('\n' + '='.repeat(50));
-    console.log(`\n🖼️  Image: ${imageUrl}`);
-    console.log(`💾 Saved: ${filename}\n`);
-    console.log('✅ SUCCESS!\n');
+    console.log('='.repeat(50) + '\n');
     
   } catch (error) {
-    console.error('❌ ERROR:', error.message);
-    console.error(error.stack);
+    console.error('\n❌ ERROR:', error.message);
+    if (error.stack) console.error(error.stack);
     process.exit(1);
   }
 }
