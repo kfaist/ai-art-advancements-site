@@ -1,4 +1,4 @@
-name: Generate Instagram Carousel (Improved)
+name: Generate Instagram Single Post
 
 on:
   workflow_dispatch:
@@ -21,11 +21,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Generate improved carousel
+      - name: Generate single Instagram post
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ZAPIER_WEBHOOK_URL: ${{ secrets.ZAPIER_WEBHOOK_URL }}
-        run: node instagram-generator/improved-carousel-generator.js
+        run: node instagram-generator/single-post-generator.js
 
       - name: Upload to Pages
         run: |
@@ -37,7 +37,7 @@ jobs:
           git config user.name "AI Art Bot"
           git config user.email "bot@ai.art"
           git add public/ instagram-generator/output/
-          git commit -m "🎨 New carousel $(date +%Y-%m-%d)" || true
+          git commit -m "📱 New single post $(date +%Y-%m-%d)" || true
           git push || true
 
       - name: Deploy to GitHub Pages
@@ -49,9 +49,11 @@ jobs:
       - name: Summary
         if: success()
         run: |
-          echo "## 🎉 Carousel Generated!" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎉 Instagram Post Generated!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Images with headlines on every 3rd slide" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Curated AI art news stories" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Source links included in caption" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Zapier notified for Instagram posting" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Single stunning image" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Detailed structured caption" >> $GITHUB_STEP_SUMMARY
+          echo "✅ THE CONTEXT + WHY IT MATTERS + THE CAPABILITIES" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Live source link" >> $GITHUB_STEP_SUMMARY
+          echo "✅ 5+ hashtags" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Zapier notified for posting" >> $GITHUB_STEP_SUMMARY
