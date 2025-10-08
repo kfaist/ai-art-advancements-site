@@ -1,0 +1,15 @@
+{
+  "title": "AI Creates Stunning 3D Art",
+  "theme": "aiArt",
+  "created": "2025-10-08T18:54:26.930Z",
+  "folder": "2025-10-08T18-54-15-0-aiArt",
+  "files": [
+    "01_cover_placeholder.txt",
+    "02_the_context.txt",
+    "03_why_it_matters.txt",
+    "04_learn_more.txt"
+  ],
+  "caption": "AI Creates Stunning 3D Art\n\nNew AI model generates photorealistic 3D scenes from text prompts in seconds\n\n#AIArt #GenerativeAI #DigitalArt #FutureOfArt #CreativeAI #ArtificialIntelligence",
+  "imagePrompt": "futuristic, cyberpunk, neon-lit, glowing, ultra vibrant digital art illustration with bold text overlay reading \"AI Creates Stunning 3D Art\" prominently displayed at the top,\n    featuring vibrant electric blue and hot pink and neon purple and cyan colors, highly detailed,\n    Instagram square format 1024x1024, professional quality, eye-catching composition,\n    clean readable typography integrated into the design, text should be clearly visible and not bleeding over edges,\n    dramatic lighting, ultra high quality, trending on artstation, magazine cover style with headline text",
+  "imageGenerated": false
+}
