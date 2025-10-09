@@ -253,9 +253,36 @@ async function generateImage(article) {
     ? 'Include subtle circuit board or code-inspired patterns.' 
     : '';
   
-  const prompt = `Create a striking abstract AI artwork for: "${article.title}". 
-  Vibrant neon colors (cyan, magenta, purple, hot pink), futuristic tech aesthetic, 
-  high visual drama perfect for Instagram. ${styleNote} NO text or words.`;
+  // Extract short headline from title (first 60 chars or up to first punctuation)
+  const headline = article.title.length > 60 
+    ? article.title.substring(0, 60).trim() 
+    : article.title;
+  
+  // Determine if this is ART-focused or TECH-focused content
+  const artKeywords = ['art', 'image generation', 'midjourney', 'dall-e', 'stable diffusion', 'creative', 'artist', 'design', 'visual', 'painting', 'drawing', 'illustration', 'flux', 'ideogram', 'krea', 'firefly', 'runway'];
+  const contentText = (article.title + ' ' + (article.contentSnippet || '')).toLowerCase();
+  const isArtFocused = artKeywords.some(keyword => contentText.includes(keyword));
+  
+  // Choose color palette based on content type
+  const colorPalette = isArtFocused
+    ? 'Vibrant neon colors: electric blue, hot pink, purple, magenta, cyan - artistic and creative aesthetic'
+    : 'Warm glowing energy palette: orange, yellow, green - technical and futuristic aesthetic';
+  
+  console.log(`   🎨 Palette: ${isArtFocused ? '💜 ART (blue/purple/pink)' : '🟠 TECH (orange/yellow/green)'}`);
+  
+  const prompt = `Create a striking futuristic AI artwork with BOLD ELECTRIC BLUE GLOWING HEADLINE TEXT reading "${headline}" prominently displayed at the top.
+  
+  Style:
+  - ${colorPalette}
+  - Electric blue glowing headline text overlay
+  - ${isArtFocused ? 'Artistic and creative' : 'Futuristic tech'} aesthetic with high visual drama
+  - Perfect for Instagram
+  - Headline must be clearly readable and prominent
+  ${styleNote}
+  
+  Theme: Abstract interpretation of ${isArtFocused ? 'AI art and creativity' : 'AI technology and innovation'}
+  
+  IMPORTANT: The blue headline text "${headline}" must be clearly visible at the top of the image.`;
   
   const response = await openai.images.generate({
     model: "dall-e-3",

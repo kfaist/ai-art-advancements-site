@@ -41,18 +41,35 @@ async function fetchAIArtNews() {
 async function generateImage(story) {
   console.log('🎨 Generating stunning AI art image...');
   
-  const prompt = `Create a stunning futuristic AI art image representing: "${story.title}"
+  // Determine if this is ART-focused or TECH-focused content
+  const artKeywords = ['art', 'image generation', 'midjourney', 'dall-e', 'stable diffusion', 'creative', 'artist', 'design', 'visual', 'painting', 'drawing', 'illustration', 'flux', 'ideogram'];
+  const isArtFocused = artKeywords.some(keyword => 
+    story.title.toLowerCase().includes(keyword) || 
+    story.context.toLowerCase().includes(keyword)
+  );
+  
+  // Choose color palette based on content type
+  const colorPalette = isArtFocused
+    ? 'Vibrant neon colors: electric blue, hot pink, purple, magenta, cyan - artistic and creative aesthetic'
+    : 'Warm glowing energy palette: orange, yellow, green - technical and futuristic aesthetic';
+  
+  console.log(`   🎨 Palette: ${isArtFocused ? '💜 ART (blue/purple/pink)' : '🟠 TECH (orange/yellow/green)'}`);
+  
+  const prompt = `Create a stunning futuristic AI image with BOLD ELECTRIC BLUE GLOWING HEADLINE TEXT reading "${story.title}" prominently displayed at the top.
   
   Style:
-  - Vibrant neon colors (electric blue, hot pink, cyan, magenta)
-  - Ultra-modern, tech-inspired aesthetic
-  - Abstract or surreal interpretation
+  - ${colorPalette}
+  - Electric blue glowing headline text overlay
+  - Ultra-modern, ${isArtFocused ? 'artistic and creative' : 'tech-inspired'} aesthetic
+  - Abstract or surreal interpretation of the theme
   - High visual impact for Instagram
   - Professional quality, magazine-worthy
-  - NO text overlay - pure visual art
-  - Dramatic lighting, trending on artstation
+  - Dramatic lighting with ${isArtFocused ? 'artistic flair' : 'sci-fi aesthetic'}
+  - Headline must be clearly readable and prominent
   
-  Theme: ${story.context}`;
+  Theme: ${story.context}
+  
+  IMPORTANT: The blue headline text "${story.title}" must be clearly visible at the top of the image.`;
   
   const response = await openai.images.generate({
     model: "dall-e-3",
